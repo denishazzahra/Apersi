@@ -68,7 +68,7 @@ Widget bottomNavbar(int currentPageIndex, Function changePage) {
             Icons.history,
             fill: 0,
           ),
-          label: 'Histori',
+          label: 'Riwayat',
         ),
       ],
     ),
