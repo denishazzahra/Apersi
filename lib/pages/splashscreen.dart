@@ -4,6 +4,8 @@ import 'package:apersi/pages/home_page.dart';
 import 'package:apersi/widgets/texts.dart';
 import 'package:flutter/material.dart';
 
+import '../utils/colors.dart';
+
 class Splashscreen extends StatefulWidget {
   const Splashscreen({super.key});
 
@@ -28,6 +30,7 @@ class _SplashscreenState extends State<Splashscreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: whiteColor,
       body: Stack(
         alignment: AlignmentDirectional.center,
         children: [
@@ -41,7 +44,6 @@ class _SplashscreenState extends State<Splashscreen> {
             padding: const EdgeInsets.all(32),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
-              // mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Image.asset(
                   'assets/images/jasa-raharja-full-logo.png',
