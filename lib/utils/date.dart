@@ -7,3 +7,7 @@ String displayDateString(DateTime date) {
 String formattedDateString(DateTime date) {
   return DateFormat('yyyy-MM-dd').format(date);
 }
+
+DateTime parseFromString(String date) {
+  return DateFormat('yyyy-MM-dd').parse(date);
+}

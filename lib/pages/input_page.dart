@@ -1,6 +1,8 @@
+import 'dart:convert';
 import 'package:apersi/utils/currency.dart';
 import 'package:material_symbols_icons/material_symbols_icons.dart';
 import 'package:flutter/material.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import '../data/golongan.dart';
 import '../utils/date.dart';
 import '../widgets/buttons.dart';
@@ -16,11 +18,11 @@ class InputPage extends StatefulWidget {
 }
 
 class _InputPageState extends State<InputPage> {
-  late TextEditingController noPolController;
-  late TextEditingController golonganController;
-  late TextEditingController swTerakhirController;
-  late TextEditingController daftarController;
-  late TextEditingController swBaruController;
+  TextEditingController noPolController = TextEditingController();
+  TextEditingController golonganController = TextEditingController();
+  TextEditingController swTerakhirController = TextEditingController();
+  TextEditingController daftarController = TextEditingController();
+  TextEditingController swBaruController = TextEditingController();
   final DateTime today = DateTime(
     DateTime.now().year,
     DateTime.now().month,
@@ -35,87 +37,72 @@ class _InputPageState extends State<InputPage> {
       totalPokok = 0,
       totalDenda = 0,
       total = 0;
+  late SharedPreferences storage;
+  Map<String, dynamic> tempAnswers = {};
 
   @override
   void initState() {
     super.initState();
-    noPolController = TextEditingController();
-    golonganController = TextEditingController();
-    swTerakhirController = TextEditingController();
-    daftarController = TextEditingController();
-    swBaruController = TextEditingController();
     daftarController.text = displayDateString(today);
-    golonganController.text = '--- Pilih golongan ---';
-    swTerakhirController.text = '--- Pilih tanggal ---';
-    swBaruController.text =
-        displayDateString(DateTime(today.year + 1, today.month, today.day));
-  }
-
-  @override
-  void dispose() {
-    noPolController.dispose();
-    golonganController.dispose();
-    swTerakhirController.dispose();
-    daftarController.dispose();
-    swBaruController.dispose();
-    super.dispose();
+    swBaruController.text = displayDateString(swBaru);
+    _loadData();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        elevation: 2,
-        surfaceTintColor: whiteColor,
-        shadowColor: blackColor,
-        // leading: Image.asset('assets/images/jasa-raharja-logo.png'),
-      ),
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ...textFieldWithSeparatedLabel(
-                  controller: noPolController,
-                  placeholder: 'Nomor Polisi',
-                  suffixIcon: const Icon(Symbols.pin)),
-              const SizedBox(height: 16),
-              ...golonganDropdown('Golongan', golonganController),
-              const SizedBox(height: 16),
-              ...textFieldWithSeparatedLabel(
-                controller: swTerakhirController,
-                placeholder: 'Tanggal SW Terakhir',
-                suffixIcon: const Icon(Symbols.calendar_month),
-                isReadOnly: true,
-                onTap: _selectDate,
-              ),
-              const SizedBox(height: 16),
-              ...textFieldWithSeparatedLabel(
-                controller: daftarController,
-                placeholder: 'Tanggal Daftar',
-                suffixIcon: const Icon(Symbols.calendar_month),
-                isReadOnly: true,
-              ),
-              const SizedBox(height: 16),
-              ...textFieldWithSeparatedLabel(
-                controller: swBaruController,
-                placeholder: 'Tanggal SW yang Akan Datang',
-                suffixIcon: const Icon(Symbols.calendar_month),
-                isReadOnly: true,
-              ),
-              const SizedBox(height: 32),
-              Divider(color: lightGreyColor),
-              const SizedBox(height: 32),
-              itemTotal('Nilai Pokok', formatCurrency(totalPokok)),
-              const SizedBox(height: 8),
-              itemTotal('Denda', formatCurrency(totalDenda)),
-              const SizedBox(height: 8),
-              wholeTotal('Total', formatCurrency(total)),
-              const SizedBox(height: 32),
-              lightBlueButton(context, 'Simpan', simpanData)
-            ],
-          ),
+    return SingleChildScrollView(
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ...textFieldWithSeparatedLabel(
+              key: 'nopol',
+              controller: noPolController,
+              placeholder: 'Nomor Polisi',
+              suffixIcon: const Icon(Symbols.pin),
+              onChanged: _storeTemp,
+            ),
+            const SizedBox(height: 16),
+            ...golonganDropdown('Golongan', golonganController),
+            const SizedBox(height: 16),
+            ...textFieldWithSeparatedLabel(
+              key: 'swTerakhir',
+              controller: swTerakhirController,
+              placeholder: 'Tanggal SW Terakhir',
+              suffixIcon: const Icon(Symbols.calendar_month),
+              isReadOnly: true,
+              onTap: _selectDate,
+            ),
+            const SizedBox(height: 16),
+            ...textFieldWithSeparatedLabel(
+              key: 'daftar',
+              controller: daftarController,
+              placeholder: 'Tanggal Daftar',
+              suffixIcon: const Icon(Symbols.calendar_month),
+              isReadOnly: true,
+              onChanged: _storeTemp,
+            ),
+            const SizedBox(height: 16),
+            ...textFieldWithSeparatedLabel(
+              key: 'swBaru',
+              controller: swBaruController,
+              placeholder: 'Tanggal SW yang Akan Datang',
+              suffixIcon: const Icon(Symbols.calendar_month),
+              isReadOnly: true,
+              onChanged: _storeTemp,
+            ),
+            const SizedBox(height: 32),
+            Divider(color: lightGreyColor),
+            const SizedBox(height: 32),
+            itemTotal('Nilai Pokok', formatCurrency(totalPokok)),
+            const SizedBox(height: 8),
+            itemTotal('Denda', formatCurrency(totalDenda)),
+            const SizedBox(height: 8),
+            wholeTotal('Total', formatCurrency(total)),
+            const SizedBox(height: 32),
+            lightBlueButton(context, 'Simpan', simpanData)
+          ],
         ),
       ),
     );
@@ -132,7 +119,6 @@ class _InputPageState extends State<InputPage> {
           data: ThemeData.light().copyWith(
             primaryColor: lightBlueColor, // Header background color
             dividerColor: whiteColor,
-            // accentColor: Colors.black, // Text color of selected date
             colorScheme: ColorScheme.light(
               primary: lightBlueColor, // Selected date color
               onPrimary: whiteColor, // Text color on selected date
@@ -150,6 +136,7 @@ class _InputPageState extends State<InputPage> {
       setState(() {
         swTerakhirController.text = displayDateString(picked);
         swTerakhir = picked;
+        _storeTemp('swTerakhir', formattedDateString(picked));
         hitungPokok();
         hitungDenda();
       });
@@ -185,6 +172,7 @@ class _InputPageState extends State<InputPage> {
         onSelected: (String? golongan) {
           setState(() {
             this.golongan = golongan!;
+            _storeTemp('golongan', golongan);
             hitungPokok();
             hitungDenda();
           });
@@ -264,7 +252,38 @@ class _InputPageState extends State<InputPage> {
       } else if (swTerakhirController.text == '--- Pilih tanggal ---') {
         throw Exception('Tanggal SW terakhir tidak boleh kosong!');
       } else {
-        // simpen ke sharedpref
+        tempAnswers = {
+          'nopol': noPolController.text.trim(),
+          'golongan': golongan,
+          'swTerakhir': formattedDateString(swTerakhir),
+          'daftar': formattedDateString(today),
+          'swBaru': formattedDateString(swBaru),
+          'pokok': totalPokok,
+          'denda': totalDenda,
+          'total': total
+        };
+        SharedPreferences.getInstance().then((storage) {
+          List<String> data =
+              storage.containsKey('data') ? storage.getStringList('data')! : [];
+          data.insert(0, jsonEncode(tempAnswers));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Data berhasil tersimpan!'),
+            ),
+          );
+          setState(() {
+            storage.remove('temp');
+            storage.setStringList('data', data);
+            noPolController.text = '';
+            swTerakhir = today;
+            swTerakhirController.text = '--- Pilih tanggal ---';
+            golongan = '';
+            golonganController.text = '--- Pilih golongan ---';
+            totalDenda = 0;
+            totalPokok = 0;
+            total = 0;
+          });
+        });
       }
     } catch (error) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -273,5 +292,42 @@ class _InputPageState extends State<InputPage> {
         ),
       );
     }
+  }
+
+  void _loadData() {
+    SharedPreferences.getInstance().then((storage) {
+      tempAnswers = jsonDecode(storage.getString('temp')!);
+    }).catchError((error) {
+      tempAnswers = {};
+    }).whenComplete(() {
+      if (tempAnswers.containsKey('nopol')) {
+        noPolController.text = tempAnswers['nopol'];
+      }
+      if (tempAnswers.containsKey('golongan')) {
+        golongan = tempAnswers['golongan'];
+        golonganController.text = golongan;
+      } else {
+        golonganController.text = '--- Pilih golongan ---';
+      }
+      if (tempAnswers.containsKey('swTerakhir')) {
+        swTerakhir = parseFromString(tempAnswers['swTerakhir']);
+        swTerakhirController.text = displayDateString(swTerakhir);
+      } else {
+        swTerakhirController.text = '--- Pilih tanggal ---';
+      }
+      if (tempAnswers.isNotEmpty) {
+        hitungPokok();
+        hitungDenda();
+      }
+    });
+  }
+
+  void _storeTemp(key, value) {
+    tempAnswers[key] = value;
+    SharedPreferences.getInstance().then((storage) {
+      storage.setString('temp', jsonEncode(tempAnswers));
+    }).catchError((error) {
+      tempAnswers = {};
+    });
   }
 }

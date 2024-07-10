@@ -37,6 +37,7 @@ dependencies:
   cupertino_icons: ^1.0.6
   intl: ^0.19.0
   material_symbols_icons: ^4.2741.0
+  shared_preferences: ^2.2.3
 
 dev_dependencies:
   flutter_test:
@@ -83,6 +84,10 @@ flutter:
           weight: 400
         - asset: assets/fonts/Poppins-SemiBold.ttf
           weight: 600
+    - family: BaskervvilleSC
+      fonts:
+        - asset: assets/fonts/BaskervvilleSC-Regular.ttf
+          weight: 400
   #
   # For details regarding fonts from package dependencies,
   # see https://flutter.dev/custom-fonts/#from-packages

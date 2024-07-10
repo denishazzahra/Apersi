@@ -3,14 +3,16 @@ import '../utils/colors.dart';
 import 'texts.dart';
 
 List<Widget> textFieldWithSeparatedLabel(
-    {required TextEditingController controller,
+    {required String key,
+    required TextEditingController controller,
     required String placeholder,
     bool isObscure = false,
     bool isReadOnly = false,
     Widget? prefixIcon,
     Widget? suffixIcon,
     bool numOnly = false,
-    Function? onTap}) {
+    Function? onTap,
+    Function? onChanged}) {
   return [
     label(placeholder),
     const SizedBox(height: 8),
@@ -20,6 +22,11 @@ List<Widget> textFieldWithSeparatedLabel(
       onTap: () {
         if (onTap != null) {
           onTap();
+        }
+      },
+      onChanged: (value) {
+        if (onChanged != null) {
+          onChanged(key, value);
         }
       },
       controller: controller,

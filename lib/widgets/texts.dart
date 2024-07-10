@@ -1,9 +1,19 @@
 import 'package:apersi/utils/colors.dart';
 import 'package:flutter/material.dart';
 
-Text label(String placeholder) {
+Text boldDefault({required String text, TextAlign alignment = TextAlign.left}) {
   return Text(
-    placeholder,
+    text,
+    style: const TextStyle(
+      fontWeight: FontWeight.w600,
+    ),
+    textAlign: alignment,
+  );
+}
+
+Text label(String text) {
+  return Text(
+    text,
     style: const TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w600,
@@ -11,12 +21,34 @@ Text label(String placeholder) {
   );
 }
 
-Text secondaryLabel(String placeholder) {
+Text secondaryLabel(String text) {
   return Text(
-    placeholder,
+    text,
     style: TextStyle(
       fontSize: 16,
       fontWeight: FontWeight.w600,
+      color: darkGreyColor,
+    ),
+  );
+}
+
+Text secondaryText(
+    {required String text, TextAlign alignment = TextAlign.left}) {
+  return Text(
+    text,
+    textAlign: alignment,
+    style: TextStyle(
+      fontSize: 14,
+      color: darkGreyColor,
+    ),
+  );
+}
+
+Text smallSecondaryText(String text) {
+  return Text(
+    text,
+    style: TextStyle(
+      fontSize: 12,
       color: darkGreyColor,
     ),
   );
