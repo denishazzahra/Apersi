@@ -144,8 +144,8 @@ class _HistoryPageState extends State<HistoryPage> {
                       ? const Icon(Symbols.keyboard_arrow_down)
                       : const Icon(Symbols.keyboard_arrow_right),
                   color: darkGreyColor,
-                  iconSize: 16,
-                  splashRadius: 16,
+                  iconSize: 24,
+                  splashRadius: 24,
                   visualDensity: VisualDensity.compact,
                 )
               ],
