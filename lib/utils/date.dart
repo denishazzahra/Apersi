@@ -1,7 +1,7 @@
 import 'package:intl/intl.dart';
 
 String displayDateString(DateTime date) {
-  return DateFormat('E, MMM d yyyy').format(date);
+  return DateFormat('EEEE, d MMMM yyyy', 'id_ID').format(date);
 }
 
 String formattedDateString(DateTime date) {

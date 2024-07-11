@@ -111,6 +111,7 @@ class _InputPageState extends State<InputPage> {
   void _selectDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
+      locale: const Locale('id'),
       initialDate: swTerakhir,
       firstDate: DateTime(1970, 1, 1),
       lastDate: swBaru,
@@ -193,26 +194,12 @@ class _InputPageState extends State<InputPage> {
     try {
       selectedGolongan =
           listGolongan.where((item) => item.nama == golongan).first;
-      int tahunSesudah = 1, bulanProrata = 0;
-      if (today.isAfter(swTerakhir)) {
-        tahunSebelum = today.year - swTerakhir.year;
-        bulanSebelum = tahunSebelum * 12 + today.month - swTerakhir.month;
-        if (today.day < swTerakhir.day) {
-          bulanSebelum--;
-        }
-        if (today.month < swTerakhir.month ||
-            (today.month == swTerakhir.month && today.day < swTerakhir.day)) {
-          tahunSebelum--;
-        }
-        bulanSebelum = bulanSebelum % 12;
-        bulanProrata = bulanSebelum;
-        if (tahunSebelum == 0 && bulanSebelum == 0) {
-          bulanSebelum = 1;
-        }
-      }
-      int pokok = (tahunSesudah + tahunSebelum) * selectedGolongan.pokok;
-      int prorata =
-          bulanProrata > 0 ? selectedGolongan.prorata[bulanProrata - 1] : 0;
+      int totalBulan =
+          (swBaru.year - swTerakhir.year) * 12 + today.month - swTerakhir.month;
+      int pokok = (totalBulan / 12).floor() * selectedGolongan.pokok;
+      int prorata = (totalBulan % 12) > 0
+          ? selectedGolongan.prorata[(totalBulan % 12) - 1]
+          : 0;
       setState(() {
         totalPokok = pokok + prorata;
       });
@@ -225,6 +212,19 @@ class _InputPageState extends State<InputPage> {
     try {
       int denda = 0;
       if (today.isAfter(swTerakhir)) {
+        tahunSebelum = today.year - swTerakhir.year;
+        bulanSebelum = tahunSebelum * 12 + today.month - swTerakhir.month;
+        if (today.day < swTerakhir.day) {
+          bulanSebelum--;
+        }
+        if (today.month < swTerakhir.month ||
+            (today.month == swTerakhir.month && today.day < swTerakhir.day)) {
+          tahunSebelum--;
+        }
+        bulanSebelum = bulanSebelum % 12;
+        if (tahunSebelum == 0 && bulanSebelum == 0) {
+          bulanSebelum = 1;
+        }
         denda = tahunSebelum * selectedGolongan.denda[3];
         int temp = ((bulanSebelum + 1) / 3).ceil();
         if (bulanSebelum > 0) {
