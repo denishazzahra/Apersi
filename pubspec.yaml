@@ -87,9 +87,9 @@ flutter:
           weight: 400
         - asset: assets/fonts/Poppins-SemiBold.ttf
           weight: 600
-    - family: BaskervvilleSC
+    - family: Bebas Neue
       fonts:
-        - asset: assets/fonts/BaskervvilleSC-Regular.ttf
+        - asset: assets/fonts/BebasNeue-Regular.ttf
           weight: 400
   #
   # For details regarding fonts from package dependencies,

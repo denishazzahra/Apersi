@@ -18,7 +18,7 @@ AppBar appBar() {
         const SizedBox(width: 8),
         const Text(
           'Apersi',
-          style: TextStyle(fontFamily: 'BaskervvilleSC', fontSize: 24),
+          style: TextStyle(fontFamily: 'Bebas Neue', fontSize: 24),
         ),
       ],
     ),

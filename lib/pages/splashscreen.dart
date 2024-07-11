@@ -54,7 +54,7 @@ class _SplashscreenState extends State<Splashscreen> {
                 const Text(
                   'Apersi',
                   style: TextStyle(
-                    fontFamily: 'BaskervvilleSC',
+                    fontFamily: 'Bebas Neue',
                     fontSize: 48,
                   ),
                   textAlign: TextAlign.center,
@@ -63,7 +63,7 @@ class _SplashscreenState extends State<Splashscreen> {
                 const Text(
                   'Aplikasi Perhitungan Mutasi',
                   style: TextStyle(
-                    fontFamily: 'BaskervvilleSC',
+                    fontFamily: 'Bebas Neue',
                     fontSize: 24,
                   ),
                   textAlign: TextAlign.center,
