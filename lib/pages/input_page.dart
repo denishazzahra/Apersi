@@ -23,13 +23,14 @@ class _InputPageState extends State<InputPage> {
   TextEditingController swTerakhirController = TextEditingController();
   TextEditingController daftarController = TextEditingController();
   TextEditingController swBaruController = TextEditingController();
-  final DateTime today = DateTime(
+  DateTime tglDaftar = DateTime(
     DateTime.now().year,
     DateTime.now().month,
     DateTime.now().day,
   );
-  late DateTime swBaru = DateTime(today.year + 1, today.month, today.day);
-  late DateTime swTerakhir = today;
+  late DateTime swBaru =
+      DateTime(tglDaftar.year + 1, tglDaftar.month, tglDaftar.day);
+  late DateTime swTerakhir = tglDaftar;
   String golongan = '';
   late Golongan selectedGolongan;
   int bulanSebelum = 0,
@@ -43,8 +44,6 @@ class _InputPageState extends State<InputPage> {
   @override
   void initState() {
     super.initState();
-    daftarController.text = displayDateString(today);
-    swBaruController.text = displayDateString(swBaru);
     _loadData();
   }
 
@@ -72,7 +71,9 @@ class _InputPageState extends State<InputPage> {
               placeholder: 'Tanggal SW Terakhir',
               suffixIcon: const Icon(Symbols.calendar_month),
               isReadOnly: true,
-              onTap: _selectDate,
+              onTap: () {
+                _selectDate(swTerakhirController, 'swTerakhir');
+              },
             ),
             const SizedBox(height: 16),
             ...textFieldWithSeparatedLabel(
@@ -81,7 +82,9 @@ class _InputPageState extends State<InputPage> {
               placeholder: 'Tanggal Daftar',
               suffixIcon: const Icon(Symbols.calendar_month),
               isReadOnly: true,
-              onChanged: _storeTemp,
+              onTap: () {
+                _selectDate(swTerakhirController, 'daftar');
+              },
             ),
             const SizedBox(height: 16),
             ...textFieldWithSeparatedLabel(
@@ -108,11 +111,11 @@ class _InputPageState extends State<InputPage> {
     );
   }
 
-  void _selectDate() async {
+  void _selectDate(TextEditingController controller, String label) async {
     final DateTime? picked = await showDatePicker(
       context: context,
       locale: const Locale('id'),
-      initialDate: swTerakhir,
+      initialDate: label == 'swTerakhir' ? swTerakhir : tglDaftar,
       firstDate: DateTime(1970, 1, 1),
       lastDate: swBaru,
       builder: (BuildContext context, Widget? child) {
@@ -135,9 +138,17 @@ class _InputPageState extends State<InputPage> {
     if (picked != null) {
       // Handle the selected date (picked)
       setState(() {
-        swTerakhirController.text = displayDateString(picked);
-        swTerakhir = picked;
-        _storeTemp('swTerakhir', formattedDateString(picked));
+        if (label == 'swTerakhir') {
+          swTerakhirController.text = displayDateString(picked);
+          swTerakhir = picked;
+          _storeTemp('swTerakhir', formattedDateString(picked));
+        } else {
+          daftarController.text = displayDateString(picked);
+          tglDaftar = picked;
+          swBaru = DateTime(tglDaftar.year + 1, tglDaftar.month, tglDaftar.day);
+          swBaruController.text = displayDateString(swBaru);
+          _storeTemp('daftar', formattedDateString(picked));
+        }
         hitungPokok();
         hitungDenda();
       });
@@ -194,8 +205,9 @@ class _InputPageState extends State<InputPage> {
     try {
       selectedGolongan =
           listGolongan.where((item) => item.nama == golongan).first;
-      int totalBulan =
-          (swBaru.year - swTerakhir.year) * 12 + today.month - swTerakhir.month;
+      int totalBulan = (swBaru.year - swTerakhir.year) * 12 +
+          tglDaftar.month -
+          swTerakhir.month;
       int pokok = (totalBulan / 12).floor() * selectedGolongan.pokok;
       int prorata = (totalBulan % 12) > 0
           ? selectedGolongan.prorata[(totalBulan % 12) - 1]
@@ -211,14 +223,15 @@ class _InputPageState extends State<InputPage> {
   void hitungDenda() {
     try {
       int denda = 0;
-      if (today.isAfter(swTerakhir)) {
-        tahunSebelum = today.year - swTerakhir.year;
-        bulanSebelum = tahunSebelum * 12 + today.month - swTerakhir.month;
-        if (today.day < swTerakhir.day) {
+      if (tglDaftar.isAfter(swTerakhir)) {
+        tahunSebelum = tglDaftar.year - swTerakhir.year;
+        bulanSebelum = tahunSebelum * 12 + tglDaftar.month - swTerakhir.month;
+        if (tglDaftar.day < swTerakhir.day) {
           bulanSebelum--;
         }
-        if (today.month < swTerakhir.month ||
-            (today.month == swTerakhir.month && today.day < swTerakhir.day)) {
+        if (tglDaftar.month < swTerakhir.month ||
+            (tglDaftar.month == swTerakhir.month &&
+                tglDaftar.day < swTerakhir.day)) {
           tahunSebelum--;
         }
         bulanSebelum = bulanSebelum % 12;
@@ -256,7 +269,7 @@ class _InputPageState extends State<InputPage> {
           'nopol': noPolController.text.trim(),
           'golongan': golongan,
           'swTerakhir': formattedDateString(swTerakhir),
-          'daftar': formattedDateString(today),
+          'daftar': formattedDateString(tglDaftar),
           'swBaru': formattedDateString(swBaru),
           'pokok': totalPokok,
           'denda': totalDenda,
@@ -275,7 +288,7 @@ class _InputPageState extends State<InputPage> {
             storage.remove('temp');
             storage.setStringList('data', data);
             noPolController.text = '';
-            swTerakhir = today;
+            swTerakhir = tglDaftar;
             swTerakhirController.text = '--- Pilih tanggal ---';
             golongan = '';
             golonganController.text = '--- Pilih golongan ---';
@@ -315,6 +328,12 @@ class _InputPageState extends State<InputPage> {
       } else {
         swTerakhirController.text = '--- Pilih tanggal ---';
       }
+      if (tempAnswers.containsKey('daftar')) {
+        tglDaftar = parseFromString(tempAnswers['daftar']);
+        swBaru = DateTime(tglDaftar.year + 1, tglDaftar.month, tglDaftar.day);
+      }
+      daftarController.text = displayDateString(tglDaftar);
+      swBaruController.text = displayDateString(swBaru);
       if (tempAnswers.isNotEmpty) {
         hitungPokok();
         hitungDenda();
